@@ -121,7 +121,18 @@ class HttpClient
         if ($httpCode >= 400) {
             throw Errors::handle($httpCode, $body ?? []);
         }
-        
+
+        // Desempacota o envelope padrão: { success: true, data: X, pagination?: Y }
+        if (is_array($body) && ($body['success'] ?? false) === true && array_key_exists('data', $body)) {
+            if (isset($body['pagination'])) {
+                return ['data' => $body['data'], 'pagination' => $body['pagination']];
+            }
+            if (isset($body['meta'])) {
+                return ['data' => $body['data'], 'meta' => $body['meta']];
+            }
+            return is_array($body['data']) ? $body['data'] : [$body['data']];
+        }
+
         return $body ?? [];
     }
     
