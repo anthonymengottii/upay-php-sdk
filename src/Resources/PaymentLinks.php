@@ -46,12 +46,17 @@ class PaymentLinks
         // Remove valores null
         $requestData = array_filter($requestData, fn($v) => $v !== null);
         
-        return $this->http->post('/payment-links', $requestData);
+        $response = $this->http->post('/payment-links', $requestData);
+        return $response['paymentLink'] ?? $response['data'] ?? $response;
     }
     
     public function list(?array $params = null): array
     {
-        return $this->http->get('/payment-links', $params);
+        $response = $this->http->get('/payment-links', $params);
+        return [
+            'data' => $response['paymentLinks'] ?? $response['data'] ?? [],
+            'pagination' => $response['pagination'] ?? ['total' => 0, 'page' => 1, 'limit' => 10],
+        ];
     }
     
     public function get(string $id): array
@@ -61,7 +66,8 @@ class PaymentLinks
         }
         
         $encodedId = rawurlencode($id);
-        return $this->http->get("/payment-links/{$encodedId}");
+        $response = $this->http->get("/payment-links/{$encodedId}");
+        return $response['paymentLink'] ?? $response['data'] ?? $response;
     }
 
     public function getBySlug(string $slug): array
@@ -71,7 +77,8 @@ class PaymentLinks
         }
 
         $encodedSlug = rawurlencode($slug);
-        return $this->http->get("/payment-links/slug/{$encodedSlug}");
+        $response = $this->http->get("/payment-links/slug/{$encodedSlug}");
+        return $response['paymentLink'] ?? $response['data'] ?? $response;
     }
     
     public function update(string $id, array $data): array

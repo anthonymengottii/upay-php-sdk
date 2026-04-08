@@ -32,11 +32,23 @@ class Coupons
         // Endpoint público em /api/coupons/validate (sem /v1)
         $data = [
             'code' => trim($code),
-            'amountCents' => $amountCents,
+            'amount' => $amountCents,
             'productIds' => $productIds ?? [],
         ];
         
-        $result = $this->http->postPublic('/api/coupons/validate', $data);
+        // Faz chamada direta pois 400 com {valid:false} é resposta válida
+        $url = $this->http->baseUrl . '/api/coupons/validate';
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_TIMEOUT => $this->http->timeout,
+            CURLOPT_POSTFIELDS => json_encode($data),
+        ]);
+        $raw = curl_exec($ch);
+        curl_close($ch);
+        $result = json_decode($raw, true) ?? [];
         
         // Normalizar resposta para o formato esperado
         return [

@@ -33,7 +33,11 @@ class Transactions
     
     public function list(?array $params = null): array
     {
-        return $this->http->get('/transactions', $params);
+        $response = $this->http->get('/transactions', $params);
+        return [
+            'data' => $response['transactions'] ?? $response['data'] ?? [],
+            'pagination' => $response['pagination'] ?? ['total' => 0, 'page' => 1, 'limit' => 10],
+        ];
     }
     
     public function get(string $id): array

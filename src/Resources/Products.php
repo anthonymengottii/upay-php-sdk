@@ -29,7 +29,11 @@ class Products
     
     public function list(?array $params = null): array
     {
-        return $this->http->get('/products', $params);
+        $response = $this->http->get('/products', $params);
+        return [
+            'data' => $response['products'] ?? $response['data'] ?? [],
+            'pagination' => $response['pagination'] ?? ['total' => 0, 'page' => 1, 'limit' => 10],
+        ];
     }
     
     public function get(string $id): array
